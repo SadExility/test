@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Script Protector</title>
+</head>
+<body style="font-family: Arial; padding:20px;">
+
+<h1>🔥 Script Protector</h1>
+
+<textarea id="script" placeholder="Cole seu script..." style="width:100%;height:200px;"></textarea>
+
+<br><br>
+
+<label>
+  <input type="checkbox" id="ascii">
+  ASCII Obfuscation (easy to skid)
+</label>
+
+<br><br>
+
+<button onclick="gerar()">🔒 Proteger</button>
+
+<p id="link"></p>
+
+<script>
+function obf(str){
+  return str.split("").map(c => "\\" + c.charCodeAt(0)).join("");
+}
+
+function gerar(){
+  let script = document.getElementById("script").value;
+  let ascii = document.getElementById("ascii").checked;
+
+  if(ascii){
+    script = `loadstring("${obf(script)}")()`;
+  }
+
+  let id = btoa(script);
+
+  let url = location.origin + "/script?id=" + id;
+
+  document.getElementById("link").innerText = url;
+}
+</script>
+
+</body>
+</html>
