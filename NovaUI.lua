@@ -16,7 +16,7 @@
 
 local NovaUI = {}
 NovaUI.__index = NovaUI
-NovaUI.Version = "1.1.2"
+NovaUI.Version = "1.0.0"
 
 --------------------------------------------------------------------------------
 -- Servicos e constantes
@@ -833,11 +833,24 @@ function NovaUI:_buildLayer(floatCfg)
 		Name = "Body",
 		Size = UDim2.fromScale(1, 1),
 		BorderSizePixel = 0,
+		ClipsDescendants = true,
 		Active = true,
 		Parent = container,
 	})
 	corner(body, radius)
-	self:_bg(body, "FloatingButton", "FloatingButton")
+
+	-- Se floatCfg.Image for um link/asset id valido e a imagem carregar, o botao fica
+	-- so com o ui corner + a imagem preenchendo tudo, sem fundo colorido. Se nao houver
+	-- imagem (ou ela falhar ao carregar), continua no modo texto: fundo colorido + letra.
+	local floatHasImage = false
+	self:_fn(body, function()
+		if floatHasImage then
+			body.BackgroundTransparency = 1
+		else
+			body.BackgroundColor3 = self.theme.FloatingButton
+			body.BackgroundTransparency = self.transparency.FloatingButton
+		end
+	end)
 
 	local iconText = tostring(floatCfg.Text or "N")
 	local icon = create("TextLabel", {
@@ -863,11 +876,20 @@ function NovaUI:_buildLayer(floatCfg)
 	})
 	if floatCfg.Image ~= nil and floatCfg.Image ~= "" then
 		loadInto(image, floatCfg.Image, function()
+			-- Imagem/asset detectado e carregado: preenche o botao inteiro, sem fundo.
+			image.ScaleType = Enum.ScaleType.Crop
+			image.Size = UDim2.fromScale(1, 1)
 			image.Visible = true
 			icon.Visible = false
+			floatHasImage = true
+			body.BackgroundTransparency = 1
 		end, function()
+			-- Nao era imagem valida (ou falhou): volta pro modo texto normal.
 			image.Visible = false
 			icon.Visible = true
+			floatHasImage = false
+			body.BackgroundColor3 = self.theme.FloatingButton
+			body.BackgroundTransparency = self.transparency.FloatingButton
 		end)
 	end
 
@@ -1108,13 +1130,6 @@ function NovaUI:_buildMain(config)
 		Parent = header,
 	})
 	self:_bg(headerLine, "Border")
-	local headerDivider = create("Frame", {
-		Position = UDim2.new(0, self.sidebarWidth - 1, 0, 0),
-		Size = UDim2.new(0, 1, 1, 0),
-		BorderSizePixel = 0,
-		Parent = header,
-	})
-	self:_bg(headerDivider, "Border")
 
 	-- Logo
 	local logoCfg = merge({ Enabled = true, Size = 30, CornerRadius = 8 }, config.Logo)
@@ -1159,8 +1174,11 @@ function NovaUI:_buildMain(config)
 	end
 
 	-- Titulo / subtitulo
+	-- Sem a linha divisoria, o header e um bloco so: titulo/subtitulo usam toda a largura
+	-- da janela (menos os botoes de controle a direita), sem truncar com "...".
 	local titleX = 12 + logoSize + 10
-	local titleWidth = math.max(40, self.sidebarWidth - titleX - 6)
+	local headerControlsMargin = 96 -- espaco reservado para os botoes de fechar/minimizar
+	local titleWidth = math.max(40, self.width - titleX - headerControlsMargin)
 	local titleLabel = create("TextLabel", {
 		Name = "Title",
 		Position = UDim2.fromOffset(titleX, 5),
@@ -1170,7 +1188,7 @@ function NovaUI:_buildMain(config)
 		Font = FONT_BOLD,
 		TextSize = 16,
 		TextXAlignment = Enum.TextXAlignment.Left,
-		TextTruncate = Enum.TextTruncate.AtEnd,
+		TextTruncate = Enum.TextTruncate.None,
 		Parent = header,
 	})
 	self:_color(titleLabel, "TextColor3", "Text")
@@ -1183,7 +1201,7 @@ function NovaUI:_buildMain(config)
 		Font = FONT,
 		TextSize = 12,
 		TextXAlignment = Enum.TextXAlignment.Left,
-		TextTruncate = Enum.TextTruncate.AtEnd,
+		TextTruncate = Enum.TextTruncate.None,
 		Parent = header,
 	})
 	self:_color(subtitleLabel, "TextColor3", "MutedText")
