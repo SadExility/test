@@ -806,7 +806,7 @@ function NovaUI:_buildLayer(floatCfg)
 	if floatCfg.Shadow ~= false then
 		local shadow = create("Frame", {
 			Name = "Shadow",
-			Position = UDim2.new(0, -4, 0, -1),
+			Position = UDim2.new(0, -4, 0, -4),
 			Size = UDim2.new(1, 8, 1, 8),
 			BackgroundColor3 = Color3.new(0, 0, 0),
 			BackgroundTransparency = 0.72,
@@ -1159,12 +1159,12 @@ function NovaUI:_buildMain(config)
 	local titleWidth = math.max(40, self.sidebarWidth - titleX - 6)
 	local titleLabel = create("TextLabel", {
 		Name = "Title",
-		Position = UDim2.fromOffset(titleX, 7),
-		Size = UDim2.fromOffset(titleWidth, 18),
+		Position = UDim2.fromOffset(titleX, 5),
+		Size = UDim2.fromOffset(titleWidth, 20),
 		BackgroundTransparency = 1,
 		Text = self.title,
 		Font = FONT_BOLD,
-		TextSize = 14,
+		TextSize = 16,
 		TextXAlignment = Enum.TextXAlignment.Left,
 		TextTruncate = Enum.TextTruncate.AtEnd,
 		Parent = header,
@@ -1172,12 +1172,12 @@ function NovaUI:_buildMain(config)
 	self:_color(titleLabel, "TextColor3", "Text")
 	local subtitleLabel = create("TextLabel", {
 		Name = "Subtitle",
-		Position = UDim2.fromOffset(titleX, 25),
-		Size = UDim2.fromOffset(titleWidth, 14),
+		Position = UDim2.fromOffset(titleX, 26),
+		Size = UDim2.fromOffset(titleWidth, 16),
 		BackgroundTransparency = 1,
 		Text = self.subtitle,
 		Font = FONT,
-		TextSize = 11,
+		TextSize = 12,
 		TextXAlignment = Enum.TextXAlignment.Left,
 		TextTruncate = Enum.TextTruncate.AtEnd,
 		Parent = header,
@@ -1187,9 +1187,9 @@ function NovaUI:_buildMain(config)
 	self.subtitleLabel = subtitleLabel
 	self.layoutTitle = function()
 		if subtitleLabel.Text == "" then
-			titleLabel.Position = UDim2.fromOffset(titleX, 14)
+			titleLabel.Position = UDim2.fromOffset(titleX, 13)
 		else
-			titleLabel.Position = UDim2.fromOffset(titleX, 7)
+			titleLabel.Position = UDim2.fromOffset(titleX, 5)
 		end
 	end
 	self.layoutTitle()
