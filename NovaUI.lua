@@ -1,6 +1,6 @@
 --[[
     NOVA UI - biblioteca de interface para Roblox (Luau)
-    Versao 1.0.0
+    Versao 1.1.3
 
     - Janela arrastavel, minimizavel, com abas, pesquisa e rodape.
     - Botao flutuante independente (camada propria) para abrir/ocultar a janela.
@@ -16,7 +16,7 @@
 
 local NovaUI = {}
 NovaUI.__index = NovaUI
-NovaUI.Version = "1.0.0"
+NovaUI.Version = "1.1.3"
 
 --------------------------------------------------------------------------------
 -- Servicos e constantes
