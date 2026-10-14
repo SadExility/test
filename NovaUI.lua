@@ -16,7 +16,7 @@
 
 local NovaUI = {}
 NovaUI.__index = NovaUI
-NovaUI.Version = "1.1.1"
+NovaUI.Version = "1.0.0"
 
 --------------------------------------------------------------------------------
 -- Servicos e constantes
@@ -266,10 +266,13 @@ local function looksLikeImage(data)
 	return false
 end
 
--- callback(asset) recebe uma string utilizavel em .Image, ou nil em caso de falha.
+-- callback(asset, isLocalAsset) recebe uma string utilizavel em .Image, ou nil em caso de falha.
+-- isLocalAsset = true quando o asset veio de um arquivo gravado em disco (writefile + getcustomasset):
+-- esses carregam na hora, e a propriedade IsLoaded nem sempre fica true para eles em executores,
+-- entao loadInto nao deve esperar por IsLoaded nesse caso (ver comentario abaixo).
 local function resolveImage(source, callback)
 	if type(source) ~= "string" or source == "" then
-		callback(nil)
+		callback(nil, false)
 		return
 	end
 	if
@@ -278,20 +281,20 @@ local function resolveImage(source, callback)
 		or source:match("^rbxthumb://")
 		or source:match("^https?://www%.roblox%.com/asset")
 	then
-		callback(source)
+		callback(source, false)
 		return
 	end
 	if source:match("^%d+$") then
-		callback("rbxassetid://" .. source)
+		callback("rbxassetid://" .. source, false)
 		return
 	end
 	if not source:match("^https?://") then
 		warnf("Imagem ignorada (formato invalido): %s", source)
-		callback(nil)
+		callback(nil, false)
 		return
 	end
 	if imageCache[source] then
-		callback(imageCache[source])
+		callback(imageCache[source], true)
 		return
 	end
 	task.spawn(function()
@@ -299,7 +302,7 @@ local function resolveImage(source, callback)
 		local getAsset = envFunc("getcustomasset") or envFunc("getsynasset")
 		if not (writeFile and getAsset) then
 			warnf("Imagem por URL indisponivel neste ambiente (faltam writefile/getcustomasset). Usando alternativa.")
-			callback(nil)
+			callback(nil, false)
 			return
 		end
 		local makeFolder = envFunc("makefolder")
@@ -326,17 +329,17 @@ local function resolveImage(source, callback)
 		end)
 		if ok and type(asset) == "string" and asset ~= "" then
 			imageCache[source] = asset
-			callback(asset)
+			callback(asset, true)
 		else
 			warnf("Nao foi possivel carregar a imagem '%s': %s", source, tostring(asset))
-			callback(nil)
+			callback(nil, false)
 		end
 	end)
 end
 
 -- Carrega a imagem dentro de um ImageLabel e confirma que carregou de verdade.
 local function loadInto(imageLabel, source, onSuccess, onFail)
-	resolveImage(source, function(asset)
+	resolveImage(source, function(asset, isLocalAsset)
 		if imageLabel.Parent == nil then
 			return
 		end
@@ -347,6 +350,16 @@ local function loadInto(imageLabel, source, onSuccess, onFail)
 			return
 		end
 		imageLabel.Image = asset
+		if isLocalAsset then
+			-- Asset local (gravado via writefile + getcustomasset): carrega instantaneamente
+			-- do disco. Em varios executores a propriedade IsLoaded nunca fica "true" para
+			-- esse tipo de asset, entao esperar por ela so faria a imagem (ja valida, ja
+			-- atribuida) ser escondida de novo pelo onFail apos o timeout. Confirma direto.
+			if onSuccess then
+				onSuccess()
+			end
+			return
+		end
 		local started = os.clock()
 		task.spawn(function()
 			while imageLabel.Parent ~= nil and not imageLabel.IsLoaded and os.clock() - started < 8 do
