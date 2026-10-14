@@ -837,16 +837,7 @@ function NovaUI:_buildLayer(floatCfg)
 		Parent = container,
 	})
 	corner(body, radius)
-	local stroke = create("UIStroke", {
-		Thickness = 1,
-		ApplyStrokeMode = Enum.ApplyStrokeMode.Border,
-		Parent = body,
-	})
 	self:_bg(body, "FloatingButton", "FloatingButton")
-	self:_fn(stroke, function()
-		stroke.Color = self.theme.Border
-		stroke.Transparency = math.clamp(self.transparency.Borders + 0.2, 0, 1)
-	end)
 
 	local iconText = tostring(floatCfg.Text or "N")
 	local icon = create("TextLabel", {
@@ -1207,7 +1198,7 @@ function NovaUI:_buildMain(config)
 	end
 	self.layoutTitle()
 
-	-- Nome da aba atual (area de conteudo)
+	-- Nome da aba atual (area de conteudo) -- oculto por padrao: nao exibe qual aba esta ativa
 	local tabNameLabel = create("TextLabel", {
 		Name = "CurrentTab",
 		Position = UDim2.fromOffset(self.sidebarWidth + 14, 0),
@@ -1218,6 +1209,7 @@ function NovaUI:_buildMain(config)
 		TextSize = 15,
 		TextXAlignment = Enum.TextXAlignment.Left,
 		TextTruncate = Enum.TextTruncate.AtEnd,
+		Visible = false,
 		Parent = header,
 	})
 	self:_color(tabNameLabel, "TextColor3", "MutedText")
