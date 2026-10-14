@@ -16,7 +16,7 @@
 
 local NovaUI = {}
 NovaUI.__index = NovaUI
-NovaUI.Version = "1.0.0"
+NovaUI.Version = "1.1.1"
 
 --------------------------------------------------------------------------------
 -- Servicos e constantes
